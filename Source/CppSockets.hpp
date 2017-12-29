@@ -46,6 +46,12 @@ namespace Sockets
 		{
 			socketId = socket(AF_INET, SOCK_STREAM, 0);
 
+			int on = 1;
+			if(setsockopt(socketId, SOL_SOCKET, SO_REUSEADDR, (const char*) &on, sizeof(on)) == -1)
+			{
+				return false;
+			}
+
 			return IsValid();
 		}
 
@@ -77,7 +83,7 @@ namespace Sockets
 				return false;
 		    }
 
-			int listen_return = ::listen(socketId, MAXCONNECTIONS );
+			int listen_return = ::listen(socketId, MAXCONNECTIONS);
 
 			if(listen_return == -1)
 			{
@@ -91,7 +97,7 @@ namespace Sockets
 		{
 
 			int addr_length = sizeof(address);
-			new_socket.socketId = ::accept(socketId, reinterpret_cast<sockaddr*>(&address), reinterpret_cast<socklen_t*>(&addr_length));
+			new_socket.socketId = ::accept(socketId, (sockaddr*)&address, reinterpret_cast<socklen_t*>(&addr_length));
 
 			if(new_socket.socketId <= 0)
 			{
@@ -139,7 +145,7 @@ namespace Sockets
 	private:
 
 		int socketId;
-		mutable sockaddr_in address;
+		sockaddr_in address;
 
 	};
 
@@ -153,12 +159,21 @@ namespace Sockets
 			Socket::Create();
 			Socket::Bind(port);
 			Socket::Listen();
-			Socket::Accept(*this);
+		}
+
+		ServerSocket()
+		{
+
 		}
 
 		virtual ~ServerSocket()
 		{
 
+		}
+
+		void Accept(ServerSocket& sock)
+		{
+			Socket::Accept(sock);
 		}
 
 		const ServerSocket& operator>>(std::string& s) const
