@@ -135,6 +135,7 @@ namespace Sockets
 
 		bool Send(const std::string& s) const
 		{
+
 			int status = ::send(socketId, s.data(), s.size(), MSG_NOSIGNAL);
 
 			return status != -1;
